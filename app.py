@@ -11,7 +11,9 @@ CORS(app)
 def home():
     return "Resume Analyzer Running"
 
-# Function to extract text from PDF
+# -----------------------------
+# PDF TEXT EXTRACTION FUNCTION
+# -----------------------------
 def extract_text_from_pdf(filepath):
     text = ""
     with open(filepath, "rb") as file:
@@ -21,7 +23,31 @@ def extract_text_from_pdf(filepath):
                 text += page.extract_text()
     return text
 
-# Analyze route
+# -----------------------------
+# SKILL LIST
+# -----------------------------
+skills_list = [
+    "python", "java", "c++", "sql", "html", "css", "javascript",
+    "linux", "windows", "aws", "azure", "docker", "kubernetes",
+    "machine learning", "data analysis", "excel", "git"
+]
+
+# -----------------------------
+# SKILL EXTRACTION FUNCTION
+# -----------------------------
+def extract_skills(text):
+    found_skills = []
+    text = text.lower()
+
+    for skill in skills_list:
+        if skill in text:
+            found_skills.append(skill)
+
+    return found_skills
+
+# -----------------------------
+# ANALYZE ROUTE
+# -----------------------------
 @app.route("/analyze", methods=["POST"])
 def analyze():
     if "resume" not in request.files:
@@ -36,17 +62,24 @@ def analyze():
     # Extract text
     text = extract_text_from_pdf(filepath)
 
-    # Handle empty text
     if not text.strip():
-        return jsonify({
-            "error": "Could not extract text from PDF"
-        })
+        return jsonify({"error": "Could not extract text from PDF"})
+
+    # Extract skills
+    skills = extract_skills(text)
+
+    # Simple scoring
+    score = len(skills) * 10
 
     return jsonify({
-        "text_preview": text[:500]
+        "text_preview": text[:300],
+        "skills": skills,
+        "score": score
     })
 
-# Run app
+# -----------------------------
+# RUN APP
+# -----------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

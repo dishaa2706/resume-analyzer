@@ -1,27 +1,23 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def home():
     return "Resume Analyzer Running"
 
-# New: Upload & analyze endpoint
 @app.route("/analyze", methods=["POST"])
 def analyze():
     if "resume" not in request.files:
         return jsonify({"error": "No file uploaded"})
 
     file = request.files["resume"]
-    
-    # Save file temporarily
-    filepath = os.path.join("temp_resume.pdf")
-    file.save(filepath)
+    file.save("temp_resume.pdf")
 
-    return jsonify({
-        "message": "File received successfully"
-    })
+    return jsonify({"message": "File received successfully"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
